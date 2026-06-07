@@ -87,3 +87,41 @@ export async function publishInvoice(invoiceId: number) {
   });
   return response.data;
 }
+
+export async function createInvoice(body: any) {
+  const path = "/invoicing/v2/invoices";
+
+  const headers = generateHttpSignature({
+    method: "post",
+    path,
+    body,
+  });
+
+  const response = await cybsClient.post(path, body, {
+    headers: {
+      ...headers,
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response.data;
+}
+
+export async function updateInvoice(invoiceId: number, body: any) {
+  const put = `/invoicing/v2/invoices/${invoiceId}`;
+
+  const headers = generateHttpSignature({
+    method: "put",
+    path: put,
+    body,
+  });
+
+  const response = await cybsClient.put(put, body, {
+    headers: {
+      ...headers,
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response.data;
+}
