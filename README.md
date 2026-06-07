@@ -58,3 +58,12 @@ CYBS_MERCHANT_ID=
 CYBS_KEY_ID=
 CYBS_SHARED_SECRET=
 ```
+
+## Notas importantes:
+
+- GET no firma digest.
+- POST sí firma digest.
+- request-target debe incluir query params si existen.
+- Si el body usa variables, se debe firmar el body ya resuelto.
+- Para Invoice Delivery usar body: {}
+- Para Invoice Delivery agregar header: Connection: close
