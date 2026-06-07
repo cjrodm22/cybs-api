@@ -30,3 +30,60 @@ export async function getInvoiceById(invoiceId: number) {
 
   return response.data;
 }
+
+export async function sendInvoice(invoiceId: number) {
+  const path = `/invoicing/v2/invoices/${invoiceId}/delivery`;
+
+  const body = {};
+
+  const headers = generateHttpSignature({
+    method: "post",
+    path,
+    body,
+  });
+
+  const response = await cybsClient.post(path, body, {
+    headers: {
+      ...headers,
+      "Content-Type": "application/json",
+      Connection: "close",
+    },
+  });
+
+  return response.data;
+}
+
+export async function cancelInvoice(invoiceId: number) {
+  const path = `/invoicing/v2/invoices/${invoiceId}/cancelation`;
+
+  const body = {};
+
+  const headers = generateHttpSignature({
+    method: "post",
+    path,
+    body,
+  });
+
+  const response = await cybsClient.post(path, body, {
+    headers,
+  });
+
+  return response.data;
+}
+
+export async function publishInvoice(invoiceId: number) {
+  const path = `/invoicing/v2/invoices/${invoiceId}/publication`;
+
+  const body = {};
+
+  const headers = generateHttpSignature({
+    method: "post",
+    path,
+    body,
+  });
+
+  const response = await cybsClient.post(path, body, {
+    headers,
+  });
+  return response.data;
+}
