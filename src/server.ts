@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import invoiceRoutes from "./routes/invoice.routes";
 
 dotenv.config();
 
@@ -15,6 +16,8 @@ app.get("/health", (_req, res) => {
     message: "CYBS API running",
   });
 });
+
+app.use("/api/invoices", invoiceRoutes);
 
 const PORT = Number(process.env.PORT) || 3000;
 
