@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import invoiceRoutes from "./routes/invoice.routes";
+import paymentRoutes from "./routes/payment.routes";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/invoices", invoiceRoutes);
+app.use("/api/payments", paymentRoutes);
 
 const PORT = Number(process.env.PORT) || 3000;
 

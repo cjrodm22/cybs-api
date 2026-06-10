@@ -24,7 +24,7 @@ v-c-date: ${vDate}
 request-target: ${requestTarget}
 v-c-merchant-id: ${env.cybs.merchantId}`;
   } else {
-    const rawBody = body ? JSON.stringify(body) : "";
+    const rawBody = body !== undefined ? JSON.stringify(body) : "";
 
     digest =
       "SHA-256=" +
