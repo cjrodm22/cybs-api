@@ -7,7 +7,7 @@ import {
   publishInvoiceController,
   sendInvoiceController,
   updateInvoiceController,
-} from "../controllers/invoice.controller";
+} from "../controllers/Invoice/invoice.controller";
 
 const router = Router();
 

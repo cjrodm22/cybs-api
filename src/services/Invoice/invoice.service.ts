@@ -1,5 +1,5 @@
-import { cybsClient } from "../cybs/cybsClient";
-import { generateHttpSignature } from "../cybs/httpSignature";
+import { cybsClient } from "../../cybs/cybsClient";
+import { generateHttpSignature } from "../../cybs/httpSignature";
 
 export async function getInvoices() {
   const path = "/invoicing/v2/invoices?offset=0&limit=5";

@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import {
   cancelInvoice,
+  createInvoice,
   getInvoiceById,
   getInvoices,
-  sendInvoice,
   publishInvoice,
-  createInvoice,
+  sendInvoice,
   updateInvoice,
-} from "../services/invoice.service";
+} from "../../services/Invoice/invoice.service";
 
 export async function getInvoicesController(_req: Request, res: Response) {
   try {
