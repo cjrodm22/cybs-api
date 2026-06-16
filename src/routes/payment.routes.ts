@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  create3DSPaymentController,
   IncrementAuthorizationController,
   SimpleAuthorizationController,
 } from "../controllers/payment/payment.controller";
@@ -34,5 +35,7 @@ routes.post("/:id/voids", VoidPaymentController);
 routes.post("/captures/:id/voids", VoidCaptureController);
 routes.post("/refunds/:id/voids", voidRefundController);
 routes.post("/credits/:id/voids", voidCreditController);
+
+routes.post("/3ds", create3DSPaymentController);
 
 export default routes;

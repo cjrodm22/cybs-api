@@ -1,0 +1,34 @@
+services:
+  cybs:
+    image: postgres:16
+    container_name: cybs-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:9.12
+    container_name: cybs-pgadmin
+    restart: unless-stopped
+    depends_on:
+      - cybs
+
+    ports:
+      - "8080:80"
+
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+
+    volumes:
+      - cybs_pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  cybs_pgadmin_data:

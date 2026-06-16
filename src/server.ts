@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import invoiceRoutes from "./routes/invoice.routes";
 import paymentRoutes from "./routes/payment.routes";
 import payerRoutes from "./routes/payer.routes";
+import { pool } from "./database/pool";
 
 dotenv.config();
 
@@ -31,6 +32,15 @@ app.use("/api/risk", payerRoutes);
 
 const PORT = Number(process.env.PORT) || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await pool.query("SELECT NOW()");
+    console.log("Database connected successfully");
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Database connection error", error);
+  }
+};
+startServer();

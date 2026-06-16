@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import {
   SimpleAuthorization,
   IncrementAnAuthorization,
+  create3DSPayment,
 } from "../../services/payment/payment.service";
 
 interface PaymentParams {
@@ -61,6 +62,36 @@ export async function IncrementAuthorizationController(
     res.status(error.response?.status || 500).json({
       success: false,
       message: "Error increment an Authorization",
+      error: error.response?.data || error.message,
+    });
+  }
+}
+
+export async function create3DSPaymentController(req: Request, res: Response) {
+  try {
+    const data = await create3DSPayment(req.body);
+
+    if (data.approved === false) {
+      return res.status(422).json({
+        success: false,
+        message: data.message,
+        data,
+      });
+    }
+
+    return res.status(201).json({
+      success: true,
+      data,
+    });
+  } catch (error: any) {
+    console.error(
+      "Error creating 3DS payment:",
+      error.response?.data || error.message,
+    );
+
+    return res.status(error.response?.status || 500).json({
+      success: false,
+      message: "Error creating 3DS payment",
       error: error.response?.data || error.message,
     });
   }
