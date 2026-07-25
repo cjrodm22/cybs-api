@@ -35,7 +35,7 @@ export async function SetupPayerAuth(body: any) {
 
   console.log("5. Antes de guardar en PostgreSQL");
 
-  await createPayerAuthSession({
+  const savedSession = await createPayerAuthSession({
     referenceId: data.consumerAuthenticationInformation?.referenceId,
     status: data.status,
 
@@ -50,7 +50,10 @@ export async function SetupPayerAuth(body: any) {
 
   console.log("6. Sesión guardada en PostgreSQL");
 
-  return data;
+  return {
+    data,
+    payerAuthSessionId: savedSession.id,
+  };
 }
 
 export async function CheckEnrollmentPayerAuth(body: any) {

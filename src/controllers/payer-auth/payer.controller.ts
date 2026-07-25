@@ -8,10 +8,11 @@ import {
 export async function setupPayerController(req: Request, res: Response) {
   const body = req.body;
   try {
-    const data = await SetupPayerAuth(body);
+    const { data, payerAuthSessionId } = await SetupPayerAuth(body);
     res.status(200).json({
       success: true,
       data,
+      payerAuthSessionId,
     });
   } catch (error: any) {
     console.error(
@@ -54,10 +55,30 @@ export async function handleChallengeReturnController(
   console.log("====== 3DS RETURN ======");
   console.log(req.body);
 
-  return res.send(`
+  const transactionId =
+    req.body.TransactionId ||
+    req.body.transactionId ||
+    req.body.authenticationTransactionId;
+
+  const payload = {
+    type: "CYBS_3DS_RETURN",
+    transactionId,
+    md: req.body.MD || req.body.md,
+    response: req.body.Response || req.body.response,
+  };
+
+  const safePayload = JSON.stringify(payload).replace(/</g, "\\u003c");
+
+  return res.status(200).send(`
+    <!DOCTYPE html>
     <html>
       <body>
         <h2>3DS Challenge Completed</h2>
+        <p>You can close this window.</p>
+
+        <script>
+          window.parent.postMessage(${safePayload}, "*");
+        </script>
       </body>
     </html>
   `);
