@@ -1,5 +1,11 @@
 export type StepStatus = "PENDING" | "RUNNING" | "SUCCESS" | "FAILED";
-export type StepId = "setup" | "collection" | "enrollment" | "challenge" | "validation" | "payment";
+export type StepId =
+  | "setup"
+  | "collection"
+  | "enrollment"
+  | "challenge"
+  | "validation"
+  | "payment";
 
 export interface StepDefinition {
   id: StepId;

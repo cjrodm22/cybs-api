@@ -1,3 +1,5 @@
+import { isRecord } from "../utils/records";
+
 export const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"
 ).replace(/\/+$/, "");
@@ -17,7 +19,7 @@ export class ApiError extends Error {
 export async function apiPost(path: string, body: unknown): Promise<unknown> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
+    response = await fetch(API_BASE_URL + path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -39,7 +41,7 @@ export async function apiPost(path: string, body: unknown): Promise<unknown> {
     const message =
       isRecord(payload) && typeof payload.message === "string"
         ? payload.message
-        : `Request failed with HTTP ${response.status}.`;
+        : "Request failed with HTTP " + response.status + ".";
     throw new ApiError(message, response.status, payload);
   }
   return payload;
@@ -47,12 +49,8 @@ export async function apiPost(path: string, body: unknown): Promise<unknown> {
 
 export async function checkBackendHealth(): Promise<boolean> {
   try {
-    return (await fetch(`${API_BASE_URL}/health`)).ok;
+    return (await fetch(API_BASE_URL + "/health")).ok;
   } catch {
     return false;
   }
-}
-
-export function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
