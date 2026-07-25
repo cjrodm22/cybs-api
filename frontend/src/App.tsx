@@ -12,6 +12,10 @@ import {
   sanitizeForDisplay,
   summaryFromResponse,
 } from "./data";
+import {
+  InvoiceFlow,
+  Non3DSPaymentFlow,
+} from "./SimpleFlows";
 import type {
   FlowSummary,
   FormValues,
@@ -37,6 +41,8 @@ const BRAND_LABELS: Record<string, string> = {
   "003": "AMERICAN EXPRESS",
 };
 
+type FlowType = "invoice" | "payment" | "3ds";
+
 const initialForm: FormValues = {
   amount: "10.00",
   currency: "NIO",
@@ -61,6 +67,7 @@ function initialSteps(): Record<StepId, StepState> {
 }
 
 export default function App() {
+  const [flowType, setFlowType] = useState<FlowType>("3ds");
   const [form, setForm] = useState<FormValues>(initialForm);
   const [steps, setSteps] =
     useState<Record<StepId, StepState>>(initialSteps);
@@ -124,6 +131,7 @@ export default function App() {
 
       challengeReturnReceivedRef.current = true;
       setChallengeReturnReceived(true);
+      setChallengeVisible(false);
       setActiveStep(undefined);
       setStep(
         "challenge",
@@ -147,6 +155,13 @@ export default function App() {
 
   function updateForm(key: keyof FormValues, value: string) {
     setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function selectFlow(nextFlow: FlowType) {
+    if (nextFlow !== "3ds") {
+      resetRuntime(true);
+    }
+    setFlowType(nextFlow);
   }
 
   function setStep(
@@ -765,7 +780,7 @@ export default function App() {
           </span>
           <span>
             <strong>CYBS</strong>
-            <small>3DS TEST LAB</small>
+            <small>PAYMENT TEST LAB</small>
           </span>
         </a>
         <div className="topbar-meta">
@@ -782,8 +797,8 @@ export default function App() {
         <section className="hero">
           <div>
             <p className="kicker">
-              <span>Payment authentication</span>
-              <b>Protocol 3DS 2.x</b>
+              <span>Payment operations</span>
+              <b>CyberSource sandbox</b>
             </p>
             <h1>
               CyberSource
@@ -791,30 +806,81 @@ export default function App() {
               <em>test console.</em>
             </h1>
             <p className="hero-copy">
-              Execute the browser authentication sequence, inspect each
-              gateway response, and authorize a sandbox payment from one
+              Create invoices, run direct authorizations, or inspect the
+              complete 3DS browser authentication sequence from one
               controlled workspace.
             </p>
           </div>
-          <div
-            className="flow-meter"
-            aria-label={`${completedCount} of 6 steps complete`}
-          >
-            <div className="meter-number">
-              <span>{String(completedCount).padStart(2, "0")}</span>
-              <small>/ 06</small>
+          {flowType === "3ds" ? (
+            <div
+              className="flow-meter"
+              aria-label={`${completedCount} of 6 steps complete`}
+            >
+              <div className="meter-number">
+                <span>{String(completedCount).padStart(2, "0")}</span>
+                <small>/ 06</small>
+              </div>
+              <div className="meter-track">
+                <i
+                  style={{
+                    width: `${(completedCount / 6) * 100}%`,
+                  }}
+                />
+              </div>
+              <p>FLOW COMPLETION</p>
             </div>
-            <div className="meter-track">
-              <i
-                style={{
-                  width: `${(completedCount / 6) * 100}%`,
-                }}
-              />
+          ) : (
+            <div className="selected-flow-summary">
+              <span>ACTIVE FLOW</span>
+              <strong>
+                {flowType === "invoice"
+                  ? "INVOICE"
+                  : "CARD / NON-3DS"}
+              </strong>
+              <p>Single-operation test</p>
             </div>
-            <p>FLOW COMPLETION</p>
-          </div>
+          )}
         </section>
 
+        <nav className="flow-selector" aria-label="Transaction Type">
+          <div>
+            <span>TRANSACTION TYPE</span>
+            <strong>Select a test flow</strong>
+          </div>
+          <div className="flow-tabs" role="tablist">
+            <button
+              role="tab"
+              aria-selected={flowType === "invoice"}
+              className={flowType === "invoice" ? "selected" : ""}
+              onClick={() => selectFlow("invoice")}
+            >
+              <b>01</b>
+              <span>Create Invoice</span>
+            </button>
+            <button
+              role="tab"
+              aria-selected={flowType === "payment"}
+              className={flowType === "payment" ? "selected" : ""}
+              onClick={() => selectFlow("payment")}
+            >
+              <b>02</b>
+              <span>Card Payment · non 3DS</span>
+            </button>
+            <button
+              role="tab"
+              aria-selected={flowType === "3ds"}
+              className={flowType === "3ds" ? "selected" : ""}
+              onClick={() => selectFlow("3ds")}
+            >
+              <b>03</b>
+              <span>Card Payment · 3DS</span>
+            </button>
+          </div>
+        </nav>
+
+        {flowType === "invoice" && <InvoiceFlow />}
+        {flowType === "payment" && <Non3DSPaymentFlow />}
+        {flowType === "3ds" && (
         <section className="workspace">
           <aside className="input-panel">
             <div className="section-heading">
@@ -1060,6 +1126,16 @@ export default function App() {
               </section>
             )}
 
+            {challengeReturnReceived && !challengeVisible && (
+              <section className="challenge-success" role="status">
+                <span>✓</span>
+                <div>
+                  <strong>Challenge completed</strong>
+                  <p>Ready to validate authentication.</p>
+                </div>
+              </section>
+            )}
+
             <section className="results-panel">
               <div className="section-heading">
                 <span>03 / OUTPUT</span>
@@ -1077,6 +1153,7 @@ export default function App() {
 
           </section>
         </section>
+        )}
       </main>
 
       <footer>
