@@ -9,11 +9,26 @@ import {
   updateInvoice,
 } from "../../services/Invoice/invoice.service";
 
+function getInvoiceIdParam(req: Request, res: Response): string | null {
+  const id = req.params.id;
+
+  if (!id || typeof id !== "string" || id.trim() === "") {
+    res.status(400).json({
+      success: false,
+      message: "Invalid invoice id",
+    });
+
+    return null;
+  }
+
+  return id;
+}
+
 export async function getInvoicesController(_req: Request, res: Response) {
   try {
     const data = await getInvoices();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data,
     });
@@ -23,7 +38,7 @@ export async function getInvoicesController(_req: Request, res: Response) {
       error.response?.data || error.message,
     );
 
-    res.status(error.response?.status || 500).json({
+    return res.status(error.response?.status || 500).json({
       success: false,
       message: "Error getting invoices",
       error: error.response?.data || error.message,
@@ -32,18 +47,13 @@ export async function getInvoicesController(_req: Request, res: Response) {
 }
 
 export async function getInvoiceByIdController(req: Request, res: Response) {
-  const id = Number(req.params.id);
-
-  if (Number.isNaN(id)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid invoice id",
-    });
-  }
+  const id = getInvoiceIdParam(req, res);
+  if (!id) return;
 
   try {
     const data = await getInvoiceById(id);
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       data,
     });
@@ -52,7 +62,8 @@ export async function getInvoiceByIdController(req: Request, res: Response) {
       `Error getting invoice with id ${id}:`,
       error.response?.data || error.message,
     );
-    res.status(error.response?.status || 500).json({
+
+    return res.status(error.response?.status || 500).json({
       success: false,
       message: "Error getting invoice",
       error: error.response?.data || error.message,
@@ -61,17 +72,13 @@ export async function getInvoiceByIdController(req: Request, res: Response) {
 }
 
 export async function sendInvoiceController(req: Request, res: Response) {
-  const id = Number(req.params.id);
+  const id = getInvoiceIdParam(req, res);
+  if (!id) return;
 
-  if (Number.isNaN(id)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid invoice id",
-    });
-  }
   try {
     const data = await sendInvoice(id);
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       data,
     });
@@ -80,7 +87,8 @@ export async function sendInvoiceController(req: Request, res: Response) {
       `Error sending invoice with id ${id}:`,
       error.response?.data || error.message,
     );
-    res.status(error.response?.status || 500).json({
+
+    return res.status(error.response?.status || 500).json({
       success: false,
       message: "Error sending invoice",
       error: error.response?.data || error.message,
@@ -89,18 +97,13 @@ export async function sendInvoiceController(req: Request, res: Response) {
 }
 
 export async function cancelInvoiceController(req: Request, res: Response) {
-  const id = Number(req.params.id);
-
-  if (Number.isNaN(id)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid invoice id",
-    });
-  }
+  const id = getInvoiceIdParam(req, res);
+  if (!id) return;
 
   try {
     const data = await cancelInvoice(id);
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       data,
     });
@@ -109,7 +112,8 @@ export async function cancelInvoiceController(req: Request, res: Response) {
       `Error canceling invoice with id ${id}:`,
       error.response?.data || error.message,
     );
-    res.status(error.response?.status || 500).json({
+
+    return res.status(error.response?.status || 500).json({
       success: false,
       message: "Error canceling invoice",
       error: error.response?.data || error.message,
@@ -118,10 +122,13 @@ export async function cancelInvoiceController(req: Request, res: Response) {
 }
 
 export async function publishInvoiceController(req: Request, res: Response) {
-  const id = Number(req.params.id);
+  const id = getInvoiceIdParam(req, res);
+  if (!id) return;
+
   try {
     const data = await publishInvoice(id);
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       data,
     });
@@ -130,7 +137,8 @@ export async function publishInvoiceController(req: Request, res: Response) {
       `Error publishing invoice with id ${id}:`,
       error.response?.data || error.message,
     );
-    res.status(error.response?.status || 500).json({
+
+    return res.status(error.response?.status || 500).json({
       success: false,
       message: "Error publishing invoice",
       error: error.response?.data || error.message,
@@ -143,9 +151,9 @@ export async function createInvoiceController(req: Request, res: Response) {
     const invoiceData = req.body;
 
     const data = await createInvoice(invoiceData);
-    res.status(201).json({
-      success: true,
 
+    return res.status(201).json({
+      success: true,
       data,
     });
   } catch (error: any) {
@@ -153,7 +161,8 @@ export async function createInvoiceController(req: Request, res: Response) {
       "Error creating invoice:",
       error.response?.data || error.message,
     );
-    res.status(error.response?.status || 500).json({
+
+    return res.status(error.response?.status || 500).json({
       success: false,
       message: "Error creating invoice",
       error: error.response?.data || error.message,
@@ -162,19 +171,15 @@ export async function createInvoiceController(req: Request, res: Response) {
 }
 
 export async function updateInvoiceController(req: Request, res: Response) {
-  const id = Number(req.params.id);
-
-  if (Number.isNaN(id)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid invoice id",
-    });
-  }
+  const id = getInvoiceIdParam(req, res);
+  if (!id) return;
 
   try {
     const invoiceData = req.body;
+
     const data = await updateInvoice(id, invoiceData);
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       data,
     });
@@ -183,7 +188,8 @@ export async function updateInvoiceController(req: Request, res: Response) {
       `Error updating invoice with id ${id}:`,
       error.response?.data || error.message,
     );
-    res.status(error.response?.status || 500).json({
+
+    return res.status(error.response?.status || 500).json({
       success: false,
       message: "Error updating invoice",
       error: error.response?.data || error.message,

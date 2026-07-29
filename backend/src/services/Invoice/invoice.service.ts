@@ -1,5 +1,14 @@
 import { cybsClient } from "../../cybs/cybsClient";
 import { generateHttpSignature } from "../../cybs/httpSignature";
+import { createOrUpdateInvoiceFromCybsResponse } from "../../repositories/invoices.repository";
+
+async function syncInvoiceWithDatabase(data: any) {
+  if (!data?.id) {
+    return null;
+  }
+
+  return await createOrUpdateInvoiceFromCybsResponse(data);
+}
 
 export async function getInvoices() {
   const path = "/invoicing/v2/invoices?offset=0&limit=5";
@@ -16,7 +25,7 @@ export async function getInvoices() {
   return response.data;
 }
 
-export async function getInvoiceById(invoiceId: number) {
+export async function getInvoiceById(invoiceId: string | number) {
   const path = `/invoicing/v2/invoices/${invoiceId}`;
 
   const headers = generateHttpSignature({
@@ -28,10 +37,17 @@ export async function getInvoiceById(invoiceId: number) {
     headers,
   });
 
-  return response.data;
+  const data = response.data;
+
+  const savedInvoice = await syncInvoiceWithDatabase(data);
+
+  return {
+    ...data,
+    savedInvoice,
+  };
 }
 
-export async function sendInvoice(invoiceId: number) {
+export async function sendInvoice(invoiceId: string | number) {
   const path = `/invoicing/v2/invoices/${invoiceId}/delivery`;
 
   const body = {};
@@ -50,10 +66,17 @@ export async function sendInvoice(invoiceId: number) {
     },
   });
 
-  return response.data;
+  const deliveryResponse = response.data;
+
+  const updatedInvoice = await getInvoiceById(invoiceId);
+
+  return {
+    deliveryResponse,
+    updatedInvoice,
+  };
 }
 
-export async function cancelInvoice(invoiceId: number) {
+export async function cancelInvoice(invoiceId: string | number) {
   const path = `/invoicing/v2/invoices/${invoiceId}/cancelation`;
 
   const body = {};
@@ -65,13 +88,23 @@ export async function cancelInvoice(invoiceId: number) {
   });
 
   const response = await cybsClient.post(path, body, {
-    headers,
+    headers: {
+      ...headers,
+      "Content-Type": "application/json",
+    },
   });
 
-  return response.data;
+  const cancelResponse = response.data;
+
+  const updatedInvoice = await getInvoiceById(invoiceId);
+
+  return {
+    cancelResponse,
+    updatedInvoice,
+  };
 }
 
-export async function publishInvoice(invoiceId: number) {
+export async function publishInvoice(invoiceId: string | number) {
   const path = `/invoicing/v2/invoices/${invoiceId}/publication`;
 
   const body = {};
@@ -83,9 +116,20 @@ export async function publishInvoice(invoiceId: number) {
   });
 
   const response = await cybsClient.post(path, body, {
-    headers,
+    headers: {
+      ...headers,
+      "Content-Type": "application/json",
+    },
   });
-  return response.data;
+
+  const publicationResponse = response.data;
+
+  const updatedInvoice = await getInvoiceById(invoiceId);
+
+  return {
+    publicationResponse,
+    updatedInvoice,
+  };
 }
 
 export async function createInvoice(body: any) {
@@ -104,24 +148,38 @@ export async function createInvoice(body: any) {
     },
   });
 
-  return response.data;
+  const data = response.data;
+
+  const savedInvoice = await syncInvoiceWithDatabase(data);
+
+  return {
+    ...data,
+    savedInvoice,
+  };
 }
 
-export async function updateInvoice(invoiceId: number, body: any) {
-  const put = `/invoicing/v2/invoices/${invoiceId}`;
+export async function updateInvoice(invoiceId: string | number, body: any) {
+  const path = `/invoicing/v2/invoices/${invoiceId}`;
 
   const headers = generateHttpSignature({
     method: "put",
-    path: put,
+    path,
     body,
   });
 
-  const response = await cybsClient.put(put, body, {
+  const response = await cybsClient.put(path, body, {
     headers: {
       ...headers,
       "Content-Type": "application/json",
     },
   });
 
-  return response.data;
+  const updateResponse = response.data;
+
+  const updatedInvoice = await getInvoiceById(invoiceId);
+
+  return {
+    updateResponse,
+    updatedInvoice,
+  };
 }
