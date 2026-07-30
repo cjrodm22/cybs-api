@@ -47,6 +47,33 @@ export async function apiPost(path: string, body: unknown): Promise<unknown> {
   return payload;
 }
 
+export async function apiGet(path: string): Promise<unknown> {
+  let response: Response;
+  try {
+    response = await fetch(API_BASE_URL + path);
+  } catch (error) {
+    throw new ApiError(
+      error instanceof Error ? error.message : "Unable to reach the backend.",
+      0,
+      undefined,
+    );
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  const payload: unknown = contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
+
+  if (!response.ok) {
+    const message =
+      isRecord(payload) && typeof payload.message === "string"
+        ? payload.message
+        : "Request failed with HTTP " + response.status + ".";
+    throw new ApiError(message, response.status, payload);
+  }
+  return payload;
+}
+
 export async function checkBackendHealth(): Promise<boolean> {
   try {
     return (await fetch(API_BASE_URL + "/health")).ok;
